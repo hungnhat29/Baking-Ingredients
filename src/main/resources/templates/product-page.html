@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.productName} + ' | HoiBaking'">Product | HoiBaking</title>
+    <link rel="stylesheet" th:href="@{/css/product-page-styles.css}">
+    <style>
+        .product-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .product-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="page-container">
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1 class="site-logo">HoiBaking</h1>
+                </div>
+                <nav class="main-navigation">
+                    <a th:href="@{/}" class="nav-link">Home</a>
+                    <a th:href="@{/products}" class="nav-link active">Products</a>
+                    <a th:href="@{/recipes}" class="nav-link">Recipes</a>
+                    <a th:href="@{/guides}" class="nav-link">Guides</a>
+                    <a th:href="@{/contact}" class="nav-link">Contact</a>
+                </nav>
+                <img src="https://api.builder.io/api/v1/image/assets/TEMP/5bdf329e732fbca834170d69a6f7b29714ce5ebe?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                     alt="User menu" class="user-menu-icon">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <div class="breadcrumb-container">
+                <span class="breadcrumb-item">Home</span>
+                <img src="https://api.builder.io/api/v1/image/assets/TEMP/fa86d44b35f06fc7f808a3c876f89f8da1c116c2?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                     alt=">" class="breadcrumb-separator">
+                <span class="breadcrumb-item">Ingredients</span>
+                <img src="https://api.builder.io/api/v1/image/assets/TEMP/ed93e81874d631463065f7c0596ed48f842c1e34?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                     alt=">" class="breadcrumb-separator">
+                <span class="breadcrumb-item current" th:text="${product.productName}">Product Name</span>
+            </div>
+        </nav>
+
+        <!-- Product Section -->
+        <section class="product-section">
+            <div class="product-container">
+                <!-- Product Image -->
+                <div class="product-image-column">
+                    <img th:src="${product.mainImageUrl}"
+                         th:alt="${product.productName}"
+                         class="product-image">
+                </div>
+
+                <!-- Product Details -->
+                <div class="product-details-column">
+                    <div class="product-info">
+                        <!-- Product Header -->
+                        <div class="product-header">
+                            <h1 class="product-title" th:text="${product.productName}">Product Name</h1>
+                            <p class="product-sku"
+                               th:if="${product.sizes != null && !product.sizes.isEmpty()}"
+                               th:text="'SKU: ' + ${product.sizes[0].sku}"
+                               id="product-sku">SKU: PRODUCT-SKU</p>
+                        </div>
+
+                        <!-- Price Section -->
+                        <div class="price-section" th:if="${product.sizes != null && !product.sizes.isEmpty()}">
+                                <span class="current-price"
+                                      th:text="${#numbers.formatDecimal(product.sizes[0].effectivePrice, 0, 'COMMA', 0, 'POINT')} + '₫'"
+                                      id="current-price">45,000₫</span>
+                            <span class="original-price"
+                                  th:if="${product.sizes[0].isPromotionActive}"
+                                  th:text="${#numbers.formatDecimal(product.sizes[0].regularPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"
+                                  id="original-price">55,000₫</span>
+                            <span class="discount-badge"
+                                  th:if="${product.sizes[0].isPromotionActive}"
+                                  th:text="'-' + ${product.sizes[0].discountPercentage} + '%'"
+                                  id="discount-badge">-18%</span>
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div class="rating-section">
+                            <img src="https://api.builder.io/api/v1/image/assets/TEMP/caf9df39e1553aef7134c45ac92077c096bd69b6?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                 alt="Rating stars" class="rating-stars">
+                            <span class="rating-score">(4.5)</span>
+                            <span class="rating-separator">|</span>
+                            <span class="review-count">128 reviews</span>
+                        </div>
+
+                        <!-- Product Options -->
+                        <div class="product-options">
+                            <!-- Size Options -->
+                            <div class="option-group" th:if="${product.sizes != null && !product.sizes.isEmpty()}">
+                                <label class="option-label">Size</label>
+                                <div class="size-options">
+                                    <button th:each="size, iterStat : ${product.sizes}"
+                                            th:class="${iterStat.first} ? 'size-option selected' : 'size-option'"
+                                            th:attr="data-price-id=${size.priceId},
+                                                         data-sku=${size.sku},
+                                                         data-effective-price=${size.effectivePrice},
+                                                         data-regular-price=${size.regularPrice},
+                                                         data-promotion-price=${size.promotionPrice},
+                                                         data-is-promotion=${size.isPromotionActive},
+                                                         data-discount=${size.discountPercentage}"
+                                            onclick="changeSize(this)"
+                                            th:text="${size.size}">500ml
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="option-group">
+                                <label class="option-label">Quantity</label>
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn decrease" onclick="decreaseQuantity()">
+                                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/f26aba176cddebde001465d695da2b5ab140204e?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                             alt="Decrease">
+                                    </button>
+                                    <input type="number" value="1" min="1" class="quantity-input" id="quantity">
+                                    <button class="quantity-btn increase" onclick="increaseQuantity()">
+                                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/7f86191051e8e2b1ba9c3f8263fcdcc02ce0b58f?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                             alt="Increase">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="add-to-cart-btn" onclick="addToCart()">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/47aa695798424ac02d258c6d0a70597e2558922c?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Cart icon" class="cart-icon">
+                                <span>Add to Cart</span>
+                            </button>
+                            <button class="wishlist-btn" onclick="addToWishlist()">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/e48ab006a959ab1ee7b3a305250e3b0fd3b08b95?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Wishlist">
+                            </button>
+                        </div>
+
+                        <!-- Product Features -->
+                        <div class="product-features">
+                            <div class="feature-item">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/cf2ca8da4bd1ab548b157a760fc51a9979d00ce8?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Free shipping" class="feature-icon">
+                                <span class="feature-text">Free shipping for orders over 500,000₫</span>
+                            </div>
+                            <div class="feature-item">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/233d3b04808b7a96390f2999b1bfe27e4449ec82?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Quality guarantee" class="feature-icon">
+                                <span class="feature-text">100% quality guarantee</span>
+                            </div>
+                            <div class="feature-item">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/8b9f9ac4fb550f77c7c8952eed6cba1d70154825?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Return policy" class="feature-icon">
+                                <span class="feature-text">7-day return policy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Tabs -->
+        <section class="product-tabs">
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="showTab('description')">Product Description</button>
+                <button class="tab-btn" onclick="showTab('usage')">Usage Instructions</button>
+                <button class="tab-btn" onclick="showTab('reviews')">Reviews (128)</button>
+            </div>
+
+            <div class="tab-content">
+                <div class="product-description" th:text="${product.description}">
+                    Product description goes here...
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Products -->
+        <section class="related-products" th:if="${relatedProducts != null && !relatedProducts.isEmpty()}">
+            <h2 class="related-title">Related Products</h2>
+            <div class="products-grid">
+                <article class="product-card" th:each="relatedProduct : ${relatedProducts}"
+                         th:if="${relatedProductStat.index < 4}">
+                    <img th:src="${relatedProduct.mainImageUrl}"
+                         th:alt="${relatedProduct.productName}"
+                         class="product-card-image">
+                    <div class="product-card-content">
+                        <h3 class="product-card-title" th:text="${relatedProduct.productName}">Product Name</h3>
+                        <p class="product-card-size"
+                           th:if="${relatedProduct.size != null}"
+                           th:text="${relatedProduct.size}">500g</p>
+                        <div class="product-card-footer">
+                                <span class="product-card-price"
+                                      th:text="${#numbers.formatDecimal(relatedProduct.minPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">65,000₫</span>
+                            <img src="https://api.builder.io/api/v1/image/assets/TEMP/007bb4c160ce6c5ea55fc50f1149c0d02e7479a7?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                 alt="Add to cart" class="add-to-cart-icon"
+                                 th:onclick="'addToCart(' + ${relatedProduct.productId} + ')'">
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <div class="company-info">
+                        <h3 class="footer-logo">HoiBaking</h3>
+                        <p class="company-description">
+                            Providing high-quality baking ingredients and tools for professional and amateur bakers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <div class="footer-section">
+                        <h4 class="footer-section-title">Products</h4>
+                        <ul class="footer-links">
+                            <li><a th:href="@{/products/ingredients}" class="footer-link">Ingredients</a></li>
+                            <li><a th:href="@{/products/tools}" class="footer-link">Tools</a></li>
+                            <li><a th:href="@{/products/equipment}" class="footer-link">Equipment</a></li>
+                            <li><a th:href="@{/products/combos}" class="footer-link">Combos</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <div class="footer-section">
+                        <h4 class="footer-section-title">Support</h4>
+                        <ul class="footer-links">
+                            <li><a th:href="@{/guides}" class="footer-link">Guides</a></li>
+                            <li><a th:href="@{/recipes}" class="footer-link">Recipes</a></li>
+                            <li><a th:href="@{/faq}" class="footer-link">FAQ</a></li>
+                            <li><a th:href="@{/contact}" class="footer-link">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <div class="footer-section">
+                        <h4 class="footer-section-title">Follow Us</h4>
+                        <div class="social-links">
+                            <a href="#" class="social-link">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/b64ec6693355416030df7b2be90ed91df15edd13?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Facebook" class="social-icon">
+                            </a>
+                            <a href="#" class="social-link">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/8e1972de79c21d0b853d01e6f223a4a0e7a867b9?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Instagram" class="social-icon">
+                            </a>
+                            <a href="#" class="social-link">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/0ffc0e2f3244702931a60e4a1881db365215b906?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="YouTube" class="social-icon">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="copyright">© 2024 HoiBaking. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const productId = /*[[${product.productId}]]*/ 0;
+    const productSizes = /*[[${product.sizes}]]*/ [];
+
+    // Quantity controls
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        input.value = parseInt(input.value) + 1;
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+
+    // Size selection with price and SKU update
+    function changeSize(button) {
+        // Update selected button
+        document.querySelectorAll('.size-option').forEach(b => b.classList.remove('selected'));
+        button.classList.add('selected');
+
+        // Get size data
+        const sku = button.getAttribute('data-sku');
+        const effectivePrice = parseFloat(button.getAttribute('data-effective-price'));
+        const regularPrice = parseFloat(button.getAttribute('data-regular-price'));
+        const isPromotion = button.getAttribute('data-is-promotion') === 'true';
+        const discount = parseInt(button.getAttribute('data-discount'));
+
+        // Update SKU
+        document.getElementById('product-sku').textContent = 'SKU: ' + sku;
+
+        // Update price
+        document.getElementById('current-price').textContent =
+            effectivePrice.toLocaleString('vi-VN') + '₫';
+
+        // Update original price and discount badge
+        const originalPriceEl = document.getElementById('original-price');
+        const discountBadgeEl = document.getElementById('discount-badge');
+
+        if (isPromotion && originalPriceEl && discountBadgeEl) {
+            originalPriceEl.textContent = regularPrice.toLocaleString('vi-VN') + '₫';
+            originalPriceEl.style.display = 'inline';
+            discountBadgeEl.textContent = '-' + discount + '%';
+            discountBadgeEl.style.display = 'inline';
+        } else {
+            if (originalPriceEl) originalPriceEl.style.display = 'none';
+            if (discountBadgeEl) discountBadgeEl.style.display = 'none';
+        }
+    }
+
+    // Add to cart
+    function addToCart() {
+        const selectedSize = document.querySelector('.size-option.selected');
+        const priceId = selectedSize ? selectedSize.getAttribute('data-price-id') : null;
+        const quantity = document.getElementById('quantity').value;
+
+        if (!priceId) {
+            alert('Please select a size');
+            return;
+        }
+
+        // TODO: Implement cart API call
+        console.log('Add to cart:', {productId, priceId, quantity});
+        alert('Product added to cart!');
+    }
+
+    // Add to wishlist
+    function addToWishlist() {
+        // TODO: Implement wishlist API call
+        console.log('Add to wishlist:', productId);
+        alert('Product added to wishlist!');
+    }
+
+    // Tab switching
+    function showTab(tabName) {
+        // TODO: Implement tab switching logic
+        console.log('Show tab:', tabName);
+    }
+
+    /*]]>*/
+</script>
+</body>
+</html>
