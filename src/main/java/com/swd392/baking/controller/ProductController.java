@@ -1,5 +1,6 @@
 package com.swd392.baking.controller;
 
+import com.swd392.baking.model.Product;
 import com.swd392.baking.model.ProductDTO;
 import com.swd392.baking.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -44,4 +45,10 @@ public class ProductController {
         List<ProductDTO> products = productService.getFeaturedProducts();
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/by-category/{id}")
+    public List<Product> getProductsByCategory(@PathVariable Integer id) {
+        return productService.getActiveProductsByCategory(id);
+    }
+
 }

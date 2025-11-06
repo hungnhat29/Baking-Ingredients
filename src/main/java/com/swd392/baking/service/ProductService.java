@@ -67,6 +67,13 @@ public class ProductService {
     }
 
     /**
+     * Lấy sản pham active by category
+     */
+    public List<Product> getActiveProductsByCategory(Integer categoryId) {
+        return productRepository.findByCategoryIdAndIsActiveTrue(categoryId);
+    }
+
+    /**
      * Convert Product entity to DTO
      */
     private ProductDTO convertToDTO(Product product) {
