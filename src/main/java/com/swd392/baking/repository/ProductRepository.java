@@ -1,6 +1,7 @@
 package com.swd392.baking.repository;
 
 import com.swd392.baking.model.Product;
+import com.swd392.baking.model.ProductDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByIsFeaturedTrueAndIsActiveTrue();
 
     // Tìm theo category
-    List<Product> findByCategoryIdAndIsActiveTrue(Integer categoryId);
+    @Query("SELECT p FROM Product p WHERE p.categoryId = ?1 AND p.isActive = true")
+    List<Product> findProductsByCategory(Integer categoryId);
 }

@@ -1,281 +1,428 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BakePro - Professional Baking Supplies</title>
-  <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BakePro - Professional Baking Supplies</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 
-  <style>
-    .category-item {
-        cursor: pointer;
-        padding: 8px 12px;
-        transition: 0.25s;
-      }
+    <style>
 
-      .category-item:hover {
-        background: #eee;
-      }
 
-      .sub-category {
-        display: none;
-        margin-left: 20px;
-      }
+        /* Bố cục sản phẩm 3 cột */
+            .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
 
-      .sub-category.open {
-        display: block;
-      }
-  </style>
+        /* Category styles cải tiến */
+        .category-item {
+            display: flow-root;
+            cursor: pointer;
+            transition: 0.25s;
+            font-weight: 500;
+        }
+
+        .sub-category {
+            display: none;
+            margin-left: 15px;
+            padding-left: 10px;
+            border-left: 2px solid #ccc;
+        }
+
+        .sub-category.open {
+            display: block;
+        }
+
+        /* Bôi đậm category được chọn */
+        .category-item.active {
+            background: #ffebcc;
+            color: #b36b00;
+        }
+
+        .product-description {
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* số dòng muốn hiển thị ban đầu */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 13px;
+            color: #555;
+        }
+        .toggle-description {
+            color: #ff9800;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 <body>
 <div class="page-container">
-  <header class="site-header">
-    <div class="header-content">
-      <div class="header-wrapper">
-        <div class="header-left">
-          <div class="logo-container">
-            <h1 class="logo">BakePro</h1>
-          </div>
-          <nav class="main-navigation">
-            <a href="#" class="nav-link">Home</a>
-            <span class="nav-link active">
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-wrapper">
+                <div class="header-left">
+                    <div class="logo-container">
+                        <h1 class="logo">BakePro</h1>
+                    </div>
+                    <nav class="main-navigation">
+                        <a href="#" class="nav-link">Home</a>
+                        <span class="nav-link active">
                                 <span>Baking Aids</span>
                             </span>
-            <a href="#" class="nav-link">Ingredients</a>
-            <a href="#" class="nav-link">Tools</a>
-            <a href="#" class="nav-link">Equipment</a>
-          </nav>
-        </div>
-        <div class="header-right">
-          <div class="search-container">
-            <div class="search-input">
-              <img src="https://api.builder.io/api/v1/image/assets/TEMP/84699590a9ef56c44498326cde62a4724694797f?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Search" class="search-icon">
-              <span class="search-placeholder">Search products...</span>
+                        <a href="#" class="nav-link">Ingredients</a>
+                        <a href="#" class="nav-link">Tools</a>
+                        <a href="#" class="nav-link">Equipment</a>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="search-container">
+                        <div class="search-input">
+                            <img src="https://api.builder.io/api/v1/image/assets/TEMP/84699590a9ef56c44498326cde62a4724694797f?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                 alt="Search" class="search-icon">
+                            <span class="search-placeholder">Search products...</span>
+                        </div>
+                    </div>
+                    <img src="https://api.builder.io/api/v1/image/assets/TEMP/c1e54eddf7f6b9a7c28bae4d5bd242e8634d3512?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                         alt="User account" class="header-icon">
+                    <img src="https://api.builder.io/api/v1/image/assets/TEMP/c3b8df85c4d2a47670ef9edb08ee8c16f695af46?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                         alt="Shopping cart" class="header-icon-large">
+                </div>
             </div>
-          </div>
-          <img src="https://api.builder.io/api/v1/image/assets/TEMP/c1e54eddf7f6b9a7c28bae4d5bd242e8634d3512?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="User account" class="header-icon">
-          <img src="https://api.builder.io/api/v1/image/assets/TEMP/c3b8df85c4d2a47670ef9edb08ee8c16f695af46?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Shopping cart" class="header-icon-large">
         </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="main-content">
-    <div class="content-wrapper">
-      <div class="layout-container">
-        <aside class="sidebar">
-          <section class="filter-section">
-            <h3 class="filter-title">Filter by Category</h3>
-            <ul id="categoryList" class="category-list">
-              <!-- Danh mục sẽ được load từ API -->
-            </ul>
-          </section>
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="layout-container">
+                <aside class="sidebar">
+                    <section class="filter-section">
+                        <h3 class="filter-title">Filter by Category</h3>
+                        <ul id="categoryList" class="category-list">
+                            <!-- Danh mục sẽ được load từ API -->
+                        </ul>
+                    </section>
 
-          <section class="filter-section">
-            <h3 class="filter-title">Price Range</h3>
-            <div class="price-filters">
-              <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">Under $25</span>
-              </label>
-              <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">$25 - $50</span>
-              </label>
-              <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">$50 - $100</span>
-              </label>
-              <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">Over $100</span>
-              </label>
+                    <section class="filter-section">
+                        <h3 class="filter-title">Price Range</h3>
+                        <div class="price-filters">
+                            <label class="price-option">
+                                <input type="checkbox" class="price-checkbox">
+                                <span class="price-label">Under $25</span>
+                            </label>
+                            <label class="price-option">
+                                <input type="checkbox" class="price-checkbox">
+                                <span class="price-label">$25 - $50</span>
+                            </label>
+                            <label class="price-option">
+                                <input type="checkbox" class="price-checkbox">
+                                <span class="price-label">$50 - $100</span>
+                            </label>
+                            <label class="price-option">
+                                <input type="checkbox" class="price-checkbox">
+                                <span class="price-label">Over $100</span>
+                            </label>
+                        </div>
+                    </section>
+                </aside>
+
+                <section class="products-section">
+                    <div class="products-header">
+                        <div class="page-title-section">
+                            <h2 class="page-title">Baking Aids</h2>
+                            <p class="page-description">Professional baking ingredients and additives for perfect
+                                results</p>
+                        </div>
+                        <div class="sort-controls">
+                            <span class="sort-label">Sort by:</span>
+                            <div class="sort-select">
+                                <span class="sort-value">Featured</span>
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/6e24038dc0cfbef1f2e508dae0a7a570c0e8c573?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Dropdown" class="dropdown-icon">
+                            </div>
+                            <img src="https://api.builder.io/api/v1/image/assets/TEMP/4cc27300d65602e82c1cd1f5bb46af7804afd99c?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                 alt="View options" class="view-icon">
+                        </div>
+                    </div>
+
+                    <div id="products-grid" class="products-grid">
+                        <!-- Sản phẩm sẽ được thêm vào đây bằng JS -->
+                    </div>
+
+
+                    <nav class="pagination" aria-label="Product pagination">
+                        <div class="pagination-container">
+                            <div class="pagination-left">
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/c1476e49a14d65a831569627ad4975dfe77c6b97?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Previous page" class="pagination-arrow">
+                                <button class="pagination-btn active">1</button>
+                                <button class="pagination-btn">2</button>
+                                <button class="pagination-btn">3</button>
+                            </div>
+                            <span class="pagination-dots">...</span>
+                            <div class="pagination-right">
+                                <button class="pagination-btn">12</button>
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/24cd6ec6b1d79b3e9a8daf86d526ce5d59e38ac9?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                                     alt="Next page" class="pagination-arrow">
+                            </div>
+                        </div>
+                    </nav>
+                </section>
             </div>
-          </section>
-        </aside>
+        </div>
+    </main>
 
-        <section class="products-section">
-          <div class="products-header">
-            <div class="page-title-section">
-              <h2 class="page-title">Baking Aids</h2>
-              <p class="page-description">Professional baking ingredients and additives for perfect results</p>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-sections">
+                <div class="footer-section">
+                    <h3 class="footer-logo">BakePro</h3>
+                    <p class="footer-description">Your trusted partner for professional baking ingredients and
+                        equipment.</p>
+                    <img src="https://api.builder.io/api/v1/image/assets/TEMP/62d95d5ed17f15f9e9d4017c406795126bae7251?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
+                         alt="Social media links" class="social-links">
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Products</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link">Baking Aids</a></li>
+                        <li><a href="#" class="footer-link">Ingredients</a></li>
+                        <li><a href="#" class="footer-link">Tools</a></li>
+                        <li><a href="#" class="footer-link">Equipment</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="footer-link">Contact Us</a></li>
+                        <li><a href="#" class="footer-link">FAQ</a></li>
+                        <li><a href="#" class="footer-link">Shipping</a></li>
+                        <li><a href="#" class="footer-link">Returns</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4 class="footer-title">Newsletter</h4>
+                    <p class="newsletter-description">Subscribe for updates and special offers</p>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="Your email" class="newsletter-input">
+                        <button class="newsletter-btn">Subscribe</button>
+                    </div>
+                </div>
             </div>
-            <div class="sort-controls">
-              <span class="sort-label">Sort by:</span>
-              <div class="sort-select">
-                <span class="sort-value">Featured</span>
-                <img src="https://api.builder.io/api/v1/image/assets/TEMP/6e24038dc0cfbef1f2e508dae0a7a570c0e8c573?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Dropdown" class="dropdown-icon">
-              </div>
-              <img src="https://api.builder.io/api/v1/image/assets/TEMP/4cc27300d65602e82c1cd1f5bb46af7804afd99c?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="View options" class="view-icon">
+            <div class="footer-bottom">
+                <p class="copyright">© 2024 BakePro. All rights reserved.</p>
             </div>
-          </div>
-
-          <div id="products-grid" class="products-grid">
-            <!-- Sản phẩm sẽ được thêm vào đây bằng JS -->
-          </div>
-
-
-          <nav class="pagination" aria-label="Product pagination">
-            <div class="pagination-container">
-              <div class="pagination-left">
-                <img src="https://api.builder.io/api/v1/image/assets/TEMP/c1476e49a14d65a831569627ad4975dfe77c6b97?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Previous page" class="pagination-arrow">
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-              </div>
-              <span class="pagination-dots">...</span>
-              <div class="pagination-right">
-                <button class="pagination-btn">12</button>
-                <img src="https://api.builder.io/api/v1/image/assets/TEMP/24cd6ec6b1d79b3e9a8daf86d526ce5d59e38ac9?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Next page" class="pagination-arrow">
-              </div>
-            </div>
-          </nav>
-        </section>
-      </div>
-    </div>
-  </main>
-
-  <footer class="site-footer">
-    <div class="footer-content">
-      <div class="footer-sections">
-        <div class="footer-section">
-          <h3 class="footer-logo">BakePro</h3>
-          <p class="footer-description">Your trusted partner for professional baking ingredients and equipment.</p>
-          <img src="https://api.builder.io/api/v1/image/assets/TEMP/62d95d5ed17f15f9e9d4017c406795126bae7251?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91" alt="Social media links" class="social-links">
         </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Products</h4>
-          <ul class="footer-links">
-            <li><a href="#" class="footer-link">Baking Aids</a></li>
-            <li><a href="#" class="footer-link">Ingredients</a></li>
-            <li><a href="#" class="footer-link">Tools</a></li>
-            <li><a href="#" class="footer-link">Equipment</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Support</h4>
-          <ul class="footer-links">
-            <li><a href="#" class="footer-link">Contact Us</a></li>
-            <li><a href="#" class="footer-link">FAQ</a></li>
-            <li><a href="#" class="footer-link">Shipping</a></li>
-            <li><a href="#" class="footer-link">Returns</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Newsletter</h4>
-          <p class="newsletter-description">Subscribe for updates and special offers</p>
-          <div class="newsletter-form">
-            <input type="email" placeholder="Your email" class="newsletter-input">
-            <button class="newsletter-btn">Subscribe</button>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p class="copyright">© 2024 BakePro. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+    </footer>
 </div>
 <script>
-  async function loadCategories() {
-    try {
-      const res = await fetch("http://localhost:8080/api/categories");
-      const categories = await res.json();
+    async function loadCategories() {
+      try {
+        const res = await fetch("http://localhost:8080/api/categories");
+        const categories = await res.json();
 
-      const list = document.getElementById("categoryList");
-      list.innerHTML = "";
+        const list = document.getElementById("categoryList");
+        list.innerHTML = "";
 
-      categories.forEach(cat => {
-        // Category Cha
-        const parentLi = document.createElement("li");
-        parentLi.className = "category-item";
-        parentLi.textContent = cat.name;
-        parentLi.dataset.id = cat.id; // ✅ lưu ID
+        let currentOpen = null;
 
-        list.appendChild(parentLi);
+        categories.forEach(cat => {
+            const parentLi = document.createElement("li");
+            parentLi.className = "category-item";
+            parentLi.innerHTML = `
+                <span>${cat.name}</span>
+                <img class="category-arrow" src="https://img.icons8.com/ios-filled/50/000000/expand-arrow.png" />
+            `;
+            parentLi.dataset.id = cat.id;
 
-        if (cat.children && cat.children.length > 0) {
-          const subUl = document.createElement("ul");
-          subUl.className = "sub-category";
+            list.appendChild(parentLi);
 
-          parentLi.addEventListener("click", (e) => {
-            e.stopPropagation(); // tránh click lan xuống con
-            subUl.classList.toggle("open");
-          });
+            if (cat.children && cat.children.length > 0) {
+                const subUl = document.createElement("ul");
+                subUl.className = "sub-category";
 
-          // Category Con
-          cat.children.forEach(child => {
-            const childLi = document.createElement("li");
-            childLi.className = "category-item";
-            childLi.textContent = child.name;
-            childLi.dataset.id = child.id;
+                parentLi.addEventListener("click", (e) => {
+                    e.stopPropagation();
 
-            childLi.addEventListener("click", (e) => {
-              e.stopPropagation();
-              loadProductsByCategory(child.id); // ✅ load sản phẩm theo category con
-            });
+                    // Đóng tất cả sub categories khác ✅
+                    document.querySelectorAll(".sub-category").forEach(ul => {
+                        if (ul !== subUl) ul.classList.remove("open");
+                    });
+                    document.querySelectorAll(".category-item").forEach(item => {
+                        if (item !== parentLi) item.classList.remove("open");
+                    });
 
-            subUl.appendChild(childLi);
-          });
+                    subUl.classList.toggle("open");
+                    parentLi.classList.toggle("open");
+                });
 
-          parentLi.appendChild(subUl); // ✅ append đúng vào category cha
-        }
-      });
+                cat.children.forEach(child => {
+                    const childLi = document.createElement("li");
+                    childLi.className = "category-item";
+                    childLi.textContent = child.name;
+                    childLi.dataset.id = child.id;
 
-    } catch (err) {
-      console.error("Không thể tải danh mục:", err);
+                    childLi.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        loadProductsByCategory(child.id);
+                    });
+
+                    subUl.appendChild(childLi);
+                });
+
+                parentLi.appendChild(subUl);
+            }
+        });
+
+      } catch (err) {
+        console.error("Không thể tải danh mục:", err);
+      }
     }
-  }
 
-  loadCategories();
+    loadCategories();
 </script>
 
 <script>
-  function renderProducts(products) {
-    const productsGrid = document.getElementById("products-grid");
-    productsGrid.innerHTML = "";
 
-    if (!products || products.length === 0) {
-      productsGrid.innerHTML = "<p>Không có sản phẩm</p>";
-      return;
+    document.addEventListener("DOMContentLoaded", function () {
+        loadFeaturedProducts();
+    });
+
+    function loadFeaturedProducts() {
+        fetch("http://localhost:8080/api/products/top-viewed")
+            .then(response => response.json())
+            .then(products => {
+                renderProducts(products);
+            })
+            .catch(error => console.error("Error loading featured products:", error));
     }
 
-    products.forEach(product => {
-      const item = document.createElement("article");
-      item.classList.add("product-card");
+    function renderProducts(products) {
+      const productsGrid = document.getElementById("products-grid");
+      productsGrid.innerHTML = "";
 
-      item.innerHTML = `
-        <img src="${product.image || '/img/default.png'}"
-             alt="${product.name}" class="product-image">
+      if (!products || products.length === 0) {
+          productsGrid.innerHTML = "<p>Không có sản phẩm</p>";
+          return;
+      }
 
-        <div class="product-info">
-          <h3 class="product-title">${product.name}</h3>
-          <p class="product-description">${product.description || ""}</p>
+      products.forEach(product => {
+          const item = document.createElement("article");
+          item.classList.add("product-card");
 
-          <div class="product-footer">
-            <span class="product-price">
-              ${(product.price || 0).toLocaleString()} VND
-            </span>
+          // Format giá (min - max)
+          let priceDisplay = "0đ";
+          if (product.minPrice !== null && product.maxPrice !== null) {
+              if (product.minPrice === product.maxPrice) {
+                  priceDisplay = `${Number(product.minPrice).toLocaleString()} VND`;
+              } else {
+                  priceDisplay = `${Number(product.minPrice).toLocaleString()} - ${Number(product.maxPrice).toLocaleString()} VND`;
+              }
+          }
 
-            <button class="add-to-cart-btn" onclick="addToCart(${product.id})">
-              🛒 Add to Cart
-            </button>
-          </div>
-        </div>`;
-      productsGrid.appendChild(item);
-    });
+          item.innerHTML = `
+              <img src="${product.mainImageUrl || '/img/default.png'}"
+                   alt="${product.productName}" class="product-image">
+
+              <div class="product-info">
+                  <h3 class="product-title">${product.productName}</h3>
+                  <p class="product-description" id="desc-${product.productId}">
+                        ${product.description || ""}
+                    </p>
+                    <span class="toggle-description" onclick="toggleDescription(${product.productId})">
+                        Xem thêm
+                    </span>
+
+                  <div class="product-footer">
+                      <span class="product-price">${priceDisplay}</span>
+
+                      <button class="add-to-cart-btn" onclick="addToCart(${product.productId})">
+                          🛒 Add to Cart
+                      </button>
+                  </div>
+              </div>`;
+          productsGrid.appendChild(item);
+      });
   }
 
-  function loadProductsByCategory(categoryId) {
-    fetch(`http://localhost:8080/api/products/by-category/${categoryId}`)
-      .then(res => res.json())
-      .then(data => renderProducts(data))
-      .catch(() => alert("Không thể tải sản phẩm!"));
-  }
 
-  function addToCart(productId) {
-    alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
-  }
+    let currentPage = 1;
+    const pageSize = 6; // 3 sản phẩm / hàng → 6 sản phẩm mỗi trang
+    let allProducts = [];
+
+    function loadProductsByCategory(categoryId) {
+      fetch(`http://localhost:8080/api/products/by-category/${categoryId}`)
+        .then(res => res.json())
+        .then(data => {
+          allProducts = data;
+          currentPage = 1;
+          renderProductsPagination();
+        })
+        .catch(() => alert("Không thể tải sản phẩm!"));
+    }
+
+    function renderProductsPagination() {
+      const start = (currentPage - 1) * pageSize;
+      const paginated = allProducts.slice(start, start + pageSize);
+      renderProducts(paginated);
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(allProducts.length / pageSize);
+      const pagination = document.querySelector(".pagination-container");
+      if (!pagination) return;
+
+      pagination.innerHTML = `
+        <button class="pagination-arrow" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
+        ${Array.from({ length: totalPages }, (_, i) => `
+          <button class="pagination-btn ${currentPage === i+1 ? 'active' : ''}">${i+1}</button>
+        `).join("")}
+        <button class="pagination-arrow" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
+      `;
+
+      pagination.querySelectorAll(".pagination-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentPage = Number(btn.textContent);
+          renderProductsPagination();
+        });
+      });
+
+      const arrows = pagination.querySelectorAll(".pagination-arrow");
+      arrows[0].addEventListener("click", () => {
+        if (currentPage > 1) currentPage--;
+        renderProductsPagination();
+      });
+      arrows[1].addEventListener("click", () => {
+        if (currentPage < totalPages) currentPage++;
+        renderProductsPagination();
+      });
+    }
+
+
+    function addToCart(productId) {
+      alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
+    }
+
+    function toggleDescription(id) {
+        const desc = document.getElementById(`desc-${id}`);
+        const btn = desc.nextElementSibling;
+
+        if (desc.classList.contains("expanded")) {
+            desc.classList.remove("expanded");
+            desc.style.webkitLineClamp = 3;
+            btn.textContent = "Xem thêm";
+        } else {
+            desc.classList.add("expanded");
+            desc.style.webkitLineClamp = "unset";
+            btn.textContent = "Thu gọn";
+        }
+    }
+
 </script>
 
 

@@ -29,4 +29,24 @@ public class ProductDTO {
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private List<ProductSizeDTO> sizes;
+
+    public ProductDTO(Integer productId, String productName, String description,
+                      Integer categoryId, String size, Integer stockQuantity,
+                      String mainImageUrl, List<String> imageUrls,
+                      Boolean isFeatured, Boolean isActive,
+                      Integer viewCount, Integer soldCount) {
+
+        this.productId = productId;
+        this.productName = productName;
+        this.description = description;
+        this.categoryId = categoryId;
+        this.size = size;
+        this.stockQuantity = stockQuantity;
+        this.mainImageUrl = mainImageUrl;
+        this.imageUrls = imageUrls;
+        this.isFeatured = isFeatured;
+        this.viewCount = viewCount;
+        this.soldCount = soldCount;
+    }
+
 }

@@ -69,8 +69,11 @@ public class ProductService {
     /**
      * Lấy sản pham active by category
      */
-    public List<Product> getActiveProductsByCategory(Integer categoryId) {
-        return productRepository.findByCategoryIdAndIsActiveTrue(categoryId);
+    public List<ProductDTO> getActiveProductsByCategory(Integer categoryId) {
+        List<Product> products = productRepository.findProductsByCategory(categoryId);
+        return products.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     /**

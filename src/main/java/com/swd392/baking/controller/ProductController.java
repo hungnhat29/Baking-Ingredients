@@ -47,8 +47,9 @@ public class ProductController {
     }
 
     @GetMapping("/by-category/{id}")
-    public List<Product> getProductsByCategory(@PathVariable Integer id) {
-        return productService.getActiveProductsByCategory(id);
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Integer id) {
+        List<ProductDTO> products = productService.getActiveProductsByCategory(id);
+        return ResponseEntity.ok(products);
     }
 
 }
