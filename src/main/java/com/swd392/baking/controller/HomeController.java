@@ -38,4 +38,9 @@ public class HomeController {
     public String homeAlternative(Model model) {
         return home(model);
     }
+
+    @GetMapping("/category")
+    public String category(Model model) {
+        return "category";
+    }
 }

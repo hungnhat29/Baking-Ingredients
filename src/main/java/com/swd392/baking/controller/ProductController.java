@@ -44,4 +44,18 @@ public class ProductController {
         List<ProductDTO> products = productService.getFeaturedProducts();
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/{id}/related")
+    public ResponseEntity<List<ProductDTO>> getRelatedProducts(
+            @PathVariable Integer id,
+            @RequestParam(required = false, defaultValue = "8") Integer limit) {
+        List<ProductDTO> products = productService.getRelatedProductsByCategory(id, limit);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/by-category/{id}")
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Integer id) {
+        List<ProductDTO> products = productService.getActiveProductsByCategory(id);
+        return ResponseEntity.ok(products);
+    }
 }

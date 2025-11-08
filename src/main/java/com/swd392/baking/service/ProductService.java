@@ -67,6 +67,16 @@ public class ProductService {
     }
 
     /**
+     * Lấy sản pham active by category
+     */
+    public List<ProductDTO> getActiveProductsByCategory(Integer categoryId) {
+        List<Product> products = productRepository.findProductsByCategory(categoryId);
+        return products.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Convert Product entity to DTO
      */
     private ProductDTO convertToDTO(Product product) {
@@ -120,5 +130,28 @@ public class ProductService {
                 .discountPercentage(size.getDiscountPercentage())
                 .isPromotionActive(size.isPromotionActive())
                 .build();
+    }
+
+    public List<ProductDTO> getRelatedProductsByCategory(Integer productId, Integer limit) {
+        // Lấy thông tin sản phẩm hiện tại
+        Product currentProduct = productRepository.findByProductIdAndIsActiveTrue(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        // Lấy tất cả sản phẩm cùng category
+        List<Product> relatedProducts = productRepository.findByCategoryIdAndIsActiveTrue(currentProduct.getCategoryId());
+
+        // Loại bỏ sản phẩm hiện tại và giới hạn số lượng
+        return relatedProducts.stream()
+                .filter(p -> !p.getProductId().equals(productId))
+                .limit(limit != null ? limit : 8)
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Overload method với limit mặc định
+     */
+    public List<ProductDTO> getRelatedProductsByCategory(Integer productId) {
+        return getRelatedProductsByCategory(productId, 8);
     }
 }

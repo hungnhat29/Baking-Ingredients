@@ -28,8 +28,8 @@ public class ProductPageController {
             ProductDTO product = productService.getProductById(id);
             model.addAttribute("product", product);
 
-            // Get related products (featured products as example)
-            List<ProductDTO> relatedProducts = productService.getFeaturedProducts();
+            // Get related products from same category (excluding current product)
+            List<ProductDTO> relatedProducts = productService.getRelatedProductsByCategory(id, 8);
             model.addAttribute("relatedProducts", relatedProducts);
 
             return "product-page";
