@@ -297,7 +297,7 @@
 
     // 🔹 Load sản phẩm nổi bật (featured)
     function loadFeaturedProducts() {
-        fetch("http://localhost:8080/api/products/top-viewed")
+        fetch("http://localhost:8080/api/products/list-products")
             .then(response => response.json())
             .then(products => {
                 allProducts = products || [];
@@ -322,12 +322,12 @@
             item.classList.add("product-card");
 
             // Format giá
-            let priceDisplay = "0 VND";
+            let priceDisplay = "RM0";
             if (product.minPrice !== null && product.maxPrice !== null) {
                 if (product.minPrice === product.maxPrice) {
-                    priceDisplay = `${Number(product.minPrice).toLocaleString()} VND`;
+                    priceDisplay = `RM${Number(product.minPrice).toFixed(2)}`;
                 } else {
-                    priceDisplay = `${Number(product.minPrice).toLocaleString()} - ${Number(product.maxPrice).toLocaleString()} VND`;
+                    priceDisplay = `RM${Number(product.minPrice).toFixed(2)} - RM${Number(product.maxPrice).toFixed(2)}`;
                 }
             }
 
@@ -351,8 +351,9 @@
                                 🛒 Add to Cart
                             </button>
                         </div>
-                      </div>
-                    </div>`;
+                    </div>
+                </div>`;
+
             productsGrid.appendChild(item);
         });
     }

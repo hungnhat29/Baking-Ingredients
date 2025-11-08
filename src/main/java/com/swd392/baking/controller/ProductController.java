@@ -46,6 +46,12 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @GetMapping("/list-products")
+    public ResponseEntity<List<ProductDTO>> getAllProductIsActive() {
+        List<ProductDTO> products = productService.listAllProductIsActive();
+        return ResponseEntity.ok(products);
+    }
+
     @GetMapping("/by-category/{id}")
     public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Integer id) {
         List<ProductDTO> products = productService.getActiveProductsByCategory(id);

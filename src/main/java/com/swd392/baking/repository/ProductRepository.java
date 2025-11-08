@@ -24,4 +24,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // Tìm theo category
     @Query("SELECT p FROM Product p WHERE p.categoryId = ?1 AND p.isActive = true")
     List<Product> findProductsByCategory(Integer categoryId);
+
+    //Lấy tất ca product
+    @Query("SELECT p FROM Product p WHERE p.isActive = true")
+    List<Product> listAllProducts();
 }

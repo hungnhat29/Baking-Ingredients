@@ -77,6 +77,16 @@ public class ProductService {
     }
 
     /**
+     * Lấy sản pham active by category
+     */
+    public List<ProductDTO> listAllProductIsActive() {
+        List<Product> products = productRepository.listAllProducts();
+        return products.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Convert Product entity to DTO
      */
     private ProductDTO convertToDTO(Product product) {
