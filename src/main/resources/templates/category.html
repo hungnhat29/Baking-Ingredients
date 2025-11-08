@@ -287,125 +287,135 @@
 </script>
 
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
         loadFeaturedProducts();
     });
 
+    let currentPage = 1;
+    const pageSize = 6; // 6 sản phẩm mỗi trang
+    let allProducts = [];
+
+    // 🔹 Load sản phẩm nổi bật (featured)
     function loadFeaturedProducts() {
         fetch("http://localhost:8080/api/products/top-viewed")
             .then(response => response.json())
             .then(products => {
-                renderProducts(products);
+                allProducts = products || [];
+                currentPage = 1;
+                renderProductsPagination(); // ✅ gọi hàm có phân trang
             })
             .catch(error => console.error("Error loading featured products:", error));
     }
 
+    // 🔹 Hiển thị danh sách sản phẩm cho 1 trang
     function renderProducts(products) {
-      const productsGrid = document.getElementById("products-grid");
-      productsGrid.innerHTML = "";
+        const productsGrid = document.getElementById("products-grid");
+        productsGrid.innerHTML = "";
 
-      if (!products || products.length === 0) {
-          productsGrid.innerHTML = "<p>Không có sản phẩm</p>";
-          return;
-      }
+        if (!products || products.length === 0) {
+            productsGrid.innerHTML = "<p>Không có sản phẩm</p>";
+            return;
+        }
 
-      products.forEach(product => {
-          const item = document.createElement("article");
-          item.classList.add("product-card");
+        products.forEach(product => {
+            const item = document.createElement("article");
+            item.classList.add("product-card");
 
-          // Format giá (min - max)
-          let priceDisplay = "0đ";
-          if (product.minPrice !== null && product.maxPrice !== null) {
-              if (product.minPrice === product.maxPrice) {
-                  priceDisplay = `${Number(product.minPrice).toLocaleString()} VND`;
-              } else {
-                  priceDisplay = `${Number(product.minPrice).toLocaleString()} - ${Number(product.maxPrice).toLocaleString()} VND`;
-              }
-          }
+            // Format giá
+            let priceDisplay = "0 VND";
+            if (product.minPrice !== null && product.maxPrice !== null) {
+                if (product.minPrice === product.maxPrice) {
+                    priceDisplay = `${Number(product.minPrice).toLocaleString()} VND`;
+                } else {
+                    priceDisplay = `${Number(product.minPrice).toLocaleString()} - ${Number(product.maxPrice).toLocaleString()} VND`;
+                }
+            }
 
-          item.innerHTML = `
-              <img src="${product.mainImageUrl || '/img/default.png'}"
-                   alt="${product.productName}" class="product-image">
+            item.innerHTML = `
+                <div class="product-click-area" onclick="viewProductDetail(${product.productId})">
+                    <img src="${product.mainImageUrl || '/img/default.png'}"
+                         alt="${product.productName}" class="product-image">
 
-              <div class="product-info">
-                  <h3 class="product-title">${product.productName}</h3>
-                  <p class="product-description" id="desc-${product.productId}">
-                        ${product.description || ""}
-                    </p>
-                    <span class="toggle-description" onclick="toggleDescription(${product.productId})">
-                        Xem thêm
-                    </span>
+                    <div class="product-info">
+                        <h3 class="product-title">${product.productName}</h3>
+                        <p class="product-description" id="desc-${product.productId}">
+                            ${product.description || ""}
+                        </p>
+                        <span class="toggle-description" onclick="toggleDescription(${product.productId})">
+                            Xem thêm
+                        </span>
 
-                  <div class="product-footer">
-                      <span class="product-price">${priceDisplay}</span>
-
-                      <button class="add-to-cart-btn" onclick="addToCart(${product.productId})">
-                          🛒 Add to Cart
-                      </button>
-                  </div>
-              </div>`;
-          productsGrid.appendChild(item);
-      });
-  }
-
-
-    let currentPage = 1;
-    const pageSize = 6; // 3 sản phẩm / hàng → 6 sản phẩm mỗi trang
-    let allProducts = [];
-
-    function loadProductsByCategory(categoryId) {
-      fetch(`http://localhost:8080/api/products/by-category/${categoryId}`)
-        .then(res => res.json())
-        .then(data => {
-          allProducts = data;
-          currentPage = 1;
-          renderProductsPagination();
-        })
-        .catch(() => alert("Không thể tải sản phẩm!"));
-    }
-
-    function renderProductsPagination() {
-      const start = (currentPage - 1) * pageSize;
-      const paginated = allProducts.slice(start, start + pageSize);
-      renderProducts(paginated);
-      renderPagination();
-    }
-
-    function renderPagination() {
-      const totalPages = Math.ceil(allProducts.length / pageSize);
-      const pagination = document.querySelector(".pagination-container");
-      if (!pagination) return;
-
-      pagination.innerHTML = `
-        <button class="pagination-arrow" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
-        ${Array.from({ length: totalPages }, (_, i) => `
-          <button class="pagination-btn ${currentPage === i+1 ? 'active' : ''}">${i+1}</button>
-        `).join("")}
-        <button class="pagination-arrow" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
-      `;
-
-      pagination.querySelectorAll(".pagination-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          currentPage = Number(btn.textContent);
-          renderProductsPagination();
+                        <div class="product-footer">
+                            <span class="product-price">${priceDisplay}</span>
+                            <button class="add-to-cart-btn" onclick="addToCart(${product.productId})">
+                                🛒 Add to Cart
+                            </button>
+                        </div>
+                      </div>
+                    </div>`;
+            productsGrid.appendChild(item);
         });
-      });
-
-      const arrows = pagination.querySelectorAll(".pagination-arrow");
-      arrows[0].addEventListener("click", () => {
-        if (currentPage > 1) currentPage--;
-        renderProductsPagination();
-      });
-      arrows[1].addEventListener("click", () => {
-        if (currentPage < totalPages) currentPage++;
-        renderProductsPagination();
-      });
     }
 
+    // 🔹 Phân trang cho toàn bộ sản phẩm hiện tại
+    function renderProductsPagination() {
+        const start = (currentPage - 1) * pageSize;
+        const paginated = allProducts.slice(start, start + pageSize);
+        renderProducts(paginated);
+        renderPagination();
+    }
 
+    // 🔹 Render nút phân trang
+    function renderPagination() {
+        const totalPages = Math.ceil(allProducts.length / pageSize);
+        const pagination = document.querySelector(".pagination-container");
+        if (!pagination) return;
+
+        pagination.innerHTML = `
+            <button class="pagination-arrow" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
+            ${Array.from({ length: totalPages }, (_, i) => `
+              <button class="pagination-btn ${currentPage === i + 1 ? 'active' : ''}">${i + 1}</button>
+            `).join("")}
+            <button class="pagination-arrow" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
+        `;
+
+        pagination.querySelectorAll(".pagination-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                currentPage = Number(btn.textContent);
+                renderProductsPagination();
+            });
+        });
+
+        const arrows = pagination.querySelectorAll(".pagination-arrow");
+        arrows[0].addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderProductsPagination();
+            }
+        });
+        arrows[1].addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderProductsPagination();
+            }
+        });
+    }
+
+    // 🔹 Khi click danh mục, cũng hiển thị có phân trang
+    function loadProductsByCategory(categoryId) {
+        fetch(`http://localhost:8080/api/products/by-category/${categoryId}`)
+            .then(res => res.json())
+            .then(data => {
+                allProducts = data;
+                currentPage = 1;
+                renderProductsPagination();
+            })
+            .catch(() => alert("Không thể tải sản phẩm!"));
+    }
+
+    // 🔹 Các hàm phụ
     function addToCart(productId) {
-      alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
+        alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
     }
 
     function toggleDescription(id) {
@@ -422,7 +432,16 @@
             btn.textContent = "Thu gọn";
         }
     }
+</script>
+<script th:inline="javascript">
+    const productDetailUrlTemplate = /*[[@{/products/{id}(id=${0})}]]*/ "/products/0";
+</script>
 
+<script>
+    function viewProductDetail(productId) {
+        const targetUrl = productDetailUrlTemplate.replace("0", productId);
+        window.location.href = targetUrl;
+    }
 </script>
 
 

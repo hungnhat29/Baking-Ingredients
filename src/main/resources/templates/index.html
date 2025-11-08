@@ -285,7 +285,7 @@
                                     <a href="#kids" class="nav-link">Kids</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#accessories" class="nav-link">Accessories</a>
+                                    <a th:href="@{/category}" class="nav-link">Category</a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" role="button" id="pages"
@@ -683,7 +683,7 @@
 
                                 <!-- Product Image -->
                                 <figure>
-                                    <a th:href="@{/product/{id}(id=${product.productId})}"
+                                    <a th:href="@{/products/{id}(id=${product.productId})}"
                                        th:title="${product.productName}">
                                         <img th:src="@{${product.mainImageUrl}}"
                                              th:alt="${product.productName}"
