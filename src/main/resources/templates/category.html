@@ -7,21 +7,58 @@
   <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}">
 
   <style>
-
-
-    /* Bố cục sản phẩm 3 cột */
+    /* Grid view (mặc định) - 3 cột */
     .products-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
-    /* Category styles cải tiến */
+    /* List view - 1 cột */
+    .products-grid.list-view {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    /* Product card trong list view */
+    .products-grid.list-view .product-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .products-grid.list-view .product-image {
+      width: 200px;
+      height: 200px;
+      flex-shrink: 0;
+    }
+
+    .products-grid.list-view .product-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .products-grid.list-view .product-description {
+      -webkit-line-clamp: 4; /* Hiển thị nhiều dòng hơn ở list view */
+    }
+
+    /* Category styles */
     .category-item {
       display: flow-root;
       cursor: pointer;
       transition: 0.25s;
       font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+
+    .category-item:hover {
+      background: #f5f5f5;
     }
 
     .sub-category {
@@ -35,21 +72,26 @@
       display: block;
     }
 
-    /* Bôi đậm category được chọn */
     .category-item.active {
       background: #ffebcc;
       color: #b36b00;
     }
 
+    /* Product description */
     .product-description {
       display: -webkit-box;
-      -webkit-line-clamp: 3; /* số dòng muốn hiển thị ban đầu */
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 13px;
       color: #555;
     }
+
+    .product-description.expanded {
+      -webkit-line-clamp: unset;
+    }
+
     .toggle-description {
       color: #ff9800;
       font-size: 12px;
@@ -58,6 +100,89 @@
       font-weight: bold;
     }
 
+    /* View toggle buttons */
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .view-btn {
+      cursor: pointer;
+      padding: 8px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    .view-btn:hover {
+      border-color: #ff9800;
+    }
+
+    .view-btn.active {
+      border-color: #ff9800;
+      background: #fff8f0;
+    }
+
+    /* Sort dropdown */
+    .sort-select {
+      cursor: pointer;
+      position: relative;
+    }
+
+    .sort-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+      min-width: 200px;
+      margin-top: 5px;
+    }
+
+    .sort-dropdown.show {
+      display: block;
+    }
+
+    .sort-option {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .sort-option:hover {
+      background: #f5f5f5;
+    }
+
+    .sort-option.active {
+      background: #ffebcc;
+      color: #b36b00;
+      font-weight: bold;
+    }
+
+    /* Price filter styles */
+    .price-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+
+    .price-checkbox {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .price-label {
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 
   <th:block th:replace="~{header :: head}"></th:block>
@@ -72,38 +197,15 @@
   <div class="preloader"></div>
 </div>
 
-<!-- Offcanvas Cart -->
-<!--<div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart">-->
-<!--    <div class="offcanvas-header justify-content-center">-->
-<!--        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>-->
-<!--    </div>-->
-<!--    <div class="offcanvas-body">-->
-<!--        <h4 class="d-flex justify-content-between align-items-center mb-3">-->
-<!--            <span class="text-primary">Your cart</span>-->
-<!--            <span class="badge bg-primary rounded-pill">3</span>-->
-<!--        </h4>-->
-<!--        <ul class="list-group mb-3">-->
-<!--            <li class="list-group-item d-flex justify-content-between lh-sm">-->
-<!--                <div>-->
-<!--                    <h6 class="my-0">Growers cider</h6>-->
-<!--                    <small class="text-body-secondary">Brief description</small>-->
-<!--                </div>-->
-<!--                <span class="text-body-secondary">$12</span>-->
-<!--            </li>-->
-<!--        </ul>-->
-<!--        <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</button>-->
-<!--    </div>-->
-<!--</div>-->
-
 <!-- Include Header -->
 <th:block th:replace="~{header :: header}"></th:block>
 
 <div class="page-container">
-
   <main class="main-content">
     <div class="content-wrapper">
       <div class="layout-container">
         <aside class="sidebar">
+          <!-- Category Filter -->
           <section class="filter-section">
             <h3 class="filter-title">Filter by Category</h3>
             <ul id="categoryList" class="category-list">
@@ -111,24 +213,25 @@
             </ul>
           </section>
 
+          <!-- Price Filter -->
           <section class="filter-section">
             <h3 class="filter-title">Price Range</h3>
             <div class="price-filters">
               <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">Under $25</span>
+                <input type="checkbox" class="price-checkbox" data-range="0-25" onchange="applyFilters()">
+                <span class="price-label">Under RM25</span>
               </label>
               <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">$25 - $50</span>
+                <input type="checkbox" class="price-checkbox" data-range="25-50" onchange="applyFilters()">
+                <span class="price-label">RM25 - RM50</span>
               </label>
               <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">$50 - $100</span>
+                <input type="checkbox" class="price-checkbox" data-range="50-100" onchange="applyFilters()">
+                <span class="price-label">RM50 - RM100</span>
               </label>
               <label class="price-option">
-                <input type="checkbox" class="price-checkbox">
-                <span class="price-label">Over $100</span>
+                <input type="checkbox" class="price-checkbox" data-range="100-999999" onchange="applyFilters()">
+                <span class="price-label">Over RM100</span>
               </label>
             </div>
           </section>
@@ -137,96 +240,80 @@
         <section class="products-section">
           <div class="products-header">
             <div class="page-title-section">
-              <h2 class="page-title">Baking Aids</h2>
-              <p class="page-description">Professional baking ingredients and additives for perfect
-                results</p>
+              <h2 class="page-title">All Products</h2>
+              <p class="page-description">Professional baking ingredients and additives for perfect results</p>
             </div>
             <div class="sort-controls">
               <span class="sort-label">Sort by:</span>
-              <div class="sort-select">
-                <span class="sort-value">Featured</span>
+              <div class="sort-select" onclick="toggleSortDropdown()">
+                <span class="sort-value" id="current-sort">Featured</span>
                 <img src="https://api.builder.io/api/v1/image/assets/TEMP/6e24038dc0cfbef1f2e508dae0a7a570c0e8c573?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
                      alt="Dropdown" class="dropdown-icon">
+
+                <!-- Sort Dropdown -->
+                <div class="sort-dropdown" id="sort-dropdown">
+                  <div class="sort-option active" data-sort="featured" onclick="sortProducts('featured')">Featured</div>
+                  <div class="sort-option" data-sort="view-high" onclick="sortProducts('view-high')">Most Viewed</div>
+                  <div class="sort-option" data-sort="view-low" onclick="sortProducts('view-low')">Least Viewed</div>
+                  <div class="sort-option" data-sort="price-low" onclick="sortProducts('price-low')">Price: Low to High</div>
+                  <div class="sort-option" data-sort="price-high" onclick="sortProducts('price-high')">Price: High to Low</div>
+                </div>
               </div>
-              <img src="https://api.builder.io/api/v1/image/assets/TEMP/4cc27300d65602e82c1cd1f5bb46af7804afd99c?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
-                   alt="View options" class="view-icon">
+
+              <!-- View Toggle -->
+              <div class="view-toggle">
+                <div class="view-btn active" id="grid-view-btn" onclick="toggleView('grid')" title="Grid View">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </div>
+                <div class="view-btn" id="list-view-btn" onclick="toggleView('list')" title="List View">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/>
+                    <line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/>
+                    <line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="4" width="3" height="4" fill="currentColor"/>
+                    <rect x="3" y="10" width="3" height="4" fill="currentColor"/>
+                    <rect x="3" y="16" width="3" height="4" fill="currentColor"/>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
+          <!-- Products Grid -->
           <div id="products-grid" class="products-grid">
             <!-- Sản phẩm sẽ được thêm vào đây bằng JS -->
           </div>
 
-
+          <!-- Pagination -->
           <nav class="pagination" aria-label="Product pagination">
             <div class="pagination-container">
-              <div class="pagination-left">
-                <img src="https://api.builder.io/api/v1/image/assets/TEMP/c1476e49a14d65a831569627ad4975dfe77c6b97?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
-                     alt="Previous page" class="pagination-arrow">
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-              </div>
-              <span class="pagination-dots">...</span>
-              <div class="pagination-right">
-                <button class="pagination-btn">12</button>
-                <img src="https://api.builder.io/api/v1/image/assets/TEMP/24cd6ec6b1d79b3e9a8daf86d526ce5d59e38ac9?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
-                     alt="Next page" class="pagination-arrow">
-              </div>
+              <!-- Sẽ được render bởi JS -->
             </div>
           </nav>
         </section>
       </div>
     </div>
   </main>
-
-  <footer class="site-footer">
-    <div class="footer-content">
-      <div class="footer-sections">
-        <div class="footer-section">
-          <h3 class="footer-logo">BakePro</h3>
-          <p class="footer-description">Your trusted partner for professional baking ingredients and
-            equipment.</p>
-          <img src="https://api.builder.io/api/v1/image/assets/TEMP/62d95d5ed17f15f9e9d4017c406795126bae7251?placeholderIfAbsent=true&apiKey=4d372ddcf6154073b7e558cf84611b91"
-               alt="Social media links" class="social-links">
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Products</h4>
-          <ul class="footer-links">
-            <li><a href="#" class="footer-link">Baking Aids</a></li>
-            <li><a href="#" class="footer-link">Ingredients</a></li>
-            <li><a href="#" class="footer-link">Tools</a></li>
-            <li><a href="#" class="footer-link">Equipment</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Support</h4>
-          <ul class="footer-links">
-            <li><a href="#" class="footer-link">Contact Us</a></li>
-            <li><a href="#" class="footer-link">FAQ</a></li>
-            <li><a href="#" class="footer-link">Shipping</a></li>
-            <li><a href="#" class="footer-link">Returns</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-title">Newsletter</h4>
-          <p class="newsletter-description">Subscribe for updates and special offers</p>
-          <div class="newsletter-form">
-            <input type="email" placeholder="Your email" class="newsletter-input">
-            <button class="newsletter-btn">Subscribe</button>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p class="copyright">© 2024 BakePro. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
 </div>
 
 <th:block th:replace="~{header :: scripts}"></th:block>
 
 <script>
+  // ==================== GLOBAL STATE ====================
+  let currentPage = 1;
+  const pageSize = 6;
+  let allProducts = [];
+  let filteredProducts = [];
+  let currentView = 'grid'; // 'grid' or 'list'
+  let currentSort = 'featured';
+  let selectedPriceRanges = [];
+
+  // ==================== LOAD CATEGORIES ====================
   async function loadCategories() {
     try {
       const res = await fetch("http://localhost:8080/api/categories");
@@ -235,15 +322,10 @@
       const list = document.getElementById("categoryList");
       list.innerHTML = "";
 
-      let currentOpen = null;
-
       categories.forEach(cat => {
         const parentLi = document.createElement("li");
         parentLi.className = "category-item";
-        parentLi.innerHTML = `
-                <span>${cat.name}</span>
-                <img class="category-arrow" src="https://img.icons8.com/ios-filled/50/000000/expand-arrow.png" />
-            `;
+        parentLi.innerHTML = `<span>${cat.name}</span>`;
         parentLi.dataset.id = cat.id;
 
         list.appendChild(parentLi);
@@ -254,15 +336,12 @@
 
           parentLi.addEventListener("click", (e) => {
             e.stopPropagation();
-
-            // Đóng tất cả sub categories khác ✅
             document.querySelectorAll(".sub-category").forEach(ul => {
               if (ul !== subUl) ul.classList.remove("open");
             });
             document.querySelectorAll(".category-item").forEach(item => {
               if (item !== parentLi) item.classList.remove("open");
             });
-
             subUl.classList.toggle("open");
             parentLi.classList.toggle("open");
           });
@@ -275,6 +354,13 @@
 
             childLi.addEventListener("click", (e) => {
               e.stopPropagation();
+
+              // Highlight active category
+              document.querySelectorAll(".category-item").forEach(item => {
+                item.classList.remove("active");
+              });
+              childLi.classList.add("active");
+
               loadProductsByCategory(child.id);
             });
 
@@ -290,24 +376,136 @@
     }
   }
 
-  loadCategories();
-</script>
-
-<script>
-
-  document.addEventListener("DOMContentLoaded", function () {
-    loadFeaturedProducts();
-  });
-
-  function loadFeaturedProducts() {
-    fetch("http://localhost:8080/api/products/top-viewed")
-            .then(response => response.json())
-            .then(products => {
-              renderProducts(products);
-            })
-            .catch(error => console.error("Error loading featured products:", error));
+  // ==================== LOAD PRODUCTS ====================
+  async function loadFeaturedProducts() {
+    try {
+      const res = await fetch("http://localhost:8080/api/products/list-products");
+      allProducts = await res.json() || [];
+      applyFilters();
+    } catch (error) {
+      console.error("Error loading products:", error);
+    }
   }
 
+  async function loadProductsByCategory(categoryId) {
+    try {
+      const res = await fetch(`http://localhost:8080/api/products/by-category/${categoryId}`);
+      allProducts = await res.json() || [];
+      applyFilters();
+    } catch (error) {
+      console.error("Error loading products:", error);
+      alert("Không thể tải sản phẩm!");
+    }
+  }
+
+  // ==================== FILTER BY PRICE ====================
+  function applyFilters() {
+    // Get selected price ranges
+    selectedPriceRanges = Array.from(document.querySelectorAll('.price-checkbox:checked'))
+            .map(cb => cb.dataset.range);
+
+    // Filter products
+    if (selectedPriceRanges.length === 0) {
+      filteredProducts = [...allProducts];
+    } else {
+      filteredProducts = allProducts.filter(product => {
+        const price = product.minPrice || 0;
+        return selectedPriceRanges.some(range => {
+          const [min, max] = range.split('-').map(Number);
+          return price >= min && price <= max;
+        });
+      });
+    }
+
+    // Apply current sort
+    applySorting();
+
+    // Reset to page 1
+    currentPage = 1;
+    renderProductsPagination();
+  }
+
+  // ==================== SORT PRODUCTS ====================
+  function toggleSortDropdown() {
+    const dropdown = document.getElementById('sort-dropdown');
+    dropdown.classList.toggle('show');
+  }
+
+  function sortProducts(sortType) {
+    currentSort = sortType;
+
+    // Update UI
+    document.querySelectorAll('.sort-option').forEach(opt => {
+      opt.classList.remove('active');
+    });
+    document.querySelector(`[data-sort="${sortType}"]`).classList.add('active');
+
+    // Update label
+    const sortLabels = {
+      'featured': 'Featured',
+      'view-high': 'Most Viewed',
+      'view-low': 'Least Viewed',
+      'price-low': 'Price: Low to High',
+      'price-high': 'Price: High to Low'
+    };
+    document.getElementById('current-sort').textContent = sortLabels[sortType];
+
+    // Close dropdown
+    document.getElementById('sort-dropdown').classList.remove('show');
+
+    // Apply sorting
+    applySorting();
+    currentPage = 1;
+    renderProductsPagination();
+  }
+
+  function applySorting() {
+    switch(currentSort) {
+      case 'view-high':
+        filteredProducts.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        break;
+      case 'view-low':
+        filteredProducts.sort((a, b) => (a.viewCount || 0) - (b.viewCount || 0));
+        break;
+      case 'price-low':
+        filteredProducts.sort((a, b) => (a.minPrice || 0) - (b.minPrice || 0));
+        break;
+      case 'price-high':
+        filteredProducts.sort((a, b) => (b.minPrice || 0) - (a.minPrice || 0));
+        break;
+      case 'featured':
+      default:
+        // Keep original order or sort by featured flag
+        filteredProducts.sort((a, b) => {
+          if (a.isFeatured && !b.isFeatured) return -1;
+          if (!a.isFeatured && b.isFeatured) return 1;
+          return 0;
+        });
+    }
+  }
+
+  // ==================== TOGGLE VIEW (GRID/LIST) ====================
+  function toggleView(view) {
+    currentView = view;
+    const grid = document.getElementById('products-grid');
+    const gridBtn = document.getElementById('grid-view-btn');
+    const listBtn = document.getElementById('list-view-btn');
+
+    if (view === 'grid') {
+      grid.classList.remove('list-view');
+      gridBtn.classList.add('active');
+      listBtn.classList.remove('active');
+    } else {
+      grid.classList.add('list-view');
+      listBtn.classList.add('active');
+      gridBtn.classList.remove('active');
+    }
+
+    // Re-render products với view mới
+    renderProductsPagination();
+  }
+
+  // ==================== RENDER PRODUCTS ====================
   function renderProducts(products) {
     const productsGrid = document.getElementById("products-grid");
     productsGrid.innerHTML = "";
@@ -321,117 +519,108 @@
       const item = document.createElement("article");
       item.classList.add("product-card");
 
-      // Format giá (min - max)
-      let priceDisplay = "0đ";
+      // Format giá
+      let priceDisplay = "RM0";
       if (product.minPrice !== null && product.maxPrice !== null) {
         if (product.minPrice === product.maxPrice) {
-          priceDisplay = `${Number(product.minPrice).toLocaleString()} VND`;
+          priceDisplay = `RM${Number(product.minPrice).toFixed(2)}`;
         } else {
-          priceDisplay = `${Number(product.minPrice).toLocaleString()} - ${Number(product.maxPrice).toLocaleString()} VND`;
+          priceDisplay = `RM${Number(product.minPrice).toFixed(2)} - RM${Number(product.maxPrice).toFixed(2)}`;
         }
       }
 
       item.innerHTML = `
-              <img src="${product.mainImageUrl || '/img/default.png'}"
-                   alt="${product.productName}" class="product-image">
+        <div class="product-click-area" onclick="viewProductDetail(${product.productId})">
+          <img src="${product.mainImageUrl || '/img/default.png'}"
+               alt="${product.productName}" class="product-image">
 
-              <div class="product-info">
-                  <h3 class="product-title">${product.productName}</h3>
-                  <p class="product-description" id="desc-${product.productId}">
-                        ${product.description || ""}
-                    </p>
-                    <span class="toggle-description" onclick="toggleDescription(${product.productId})">
-                        Xem thêm
-                    </span>
+          <div class="product-info">
+            <h3 class="product-title">${product.productName}</h3>
+            <p class="product-description" id="desc-${product.productId}">
+              ${product.description || ""}
+            </p>
+            <span class="toggle-description" onclick="event.stopPropagation(); toggleDescription(${product.productId})">
+              Xem thêm
+            </span>
 
-                  <div class="product-footer">
-                      <span class="product-price">${priceDisplay}</span>
+            <div class="product-footer">
+              <span class="product-price">${priceDisplay}</span>
+              ${product.viewCount ? `<small style="color: #999;">👁️ ${product.viewCount} views</small>` : ''}
+              <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.productId})">
+                🛒 Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>`;
 
-                      <button class="add-to-cart-btn" onclick="addToCart(${product.productId})">
-                          🛒 Add to Cart
-                      </button>
-                  </div>
-              </div>`;
       productsGrid.appendChild(item);
     });
   }
 
-
-  let currentPage = 1;
-  const pageSize = 6; // 3 sản phẩm / hàng → 6 sản phẩm mỗi trang
-  let allProducts = [];
-
-  function loadProductsByCategory(categoryId) {
-    fetch(`http://localhost:8080/api/products/by-category/${categoryId}`)
-            .then(res => res.json())
-            .then(data => {
-              allProducts = data;
-              currentPage = 1;
-              renderProductsPagination();
-            })
-            .catch(() => alert("Không thể tải sản phẩm!"));
-  }
-
   function renderProductsPagination() {
     const start = (currentPage - 1) * pageSize;
-    const paginated = allProducts.slice(start, start + pageSize);
+    const paginated = filteredProducts.slice(start, start + pageSize);
     renderProducts(paginated);
     renderPagination();
   }
 
   function renderPagination() {
-    const totalPages = Math.ceil(allProducts.length / pageSize);
+    const totalPages = Math.ceil(filteredProducts.length / pageSize);
     const pagination = document.querySelector(".pagination-container");
     if (!pagination) return;
 
     pagination.innerHTML = `
-        <button class="pagination-arrow" ${currentPage === 1 ? 'disabled' : ''}>◀</button>
-        ${Array.from({ length: totalPages }, (_, i) => `
-          <button class="pagination-btn ${currentPage === i+1 ? 'active' : ''}">${i+1}</button>
-        `).join("")}
-        <button class="pagination-arrow" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>
-      `;
-
-    pagination.querySelectorAll(".pagination-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        currentPage = Number(btn.textContent);
-        renderProductsPagination();
-      });
-    });
-
-    const arrows = pagination.querySelectorAll(".pagination-arrow");
-    arrows[0].addEventListener("click", () => {
-      if (currentPage > 1) currentPage--;
-      renderProductsPagination();
-    });
-    arrows[1].addEventListener("click", () => {
-      if (currentPage < totalPages) currentPage++;
-      renderProductsPagination();
-    });
+      <button class="pagination-arrow" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">◀</button>
+      ${Array.from({ length: totalPages }, (_, i) => `
+        <button class="pagination-btn ${currentPage === i + 1 ? 'active' : ''}" onclick="changePage(${i + 1})">${i + 1}</button>
+      `).join("")}
+      <button class="pagination-arrow" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">▶</button>
+    `;
   }
 
-
-  function addToCart(productId) {
-    alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
+  function changePage(page) {
+    const totalPages = Math.ceil(filteredProducts.length / pageSize);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderProductsPagination();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // ==================== HELPER FUNCTIONS ====================
   function toggleDescription(id) {
     const desc = document.getElementById(`desc-${id}`);
     const btn = desc.nextElementSibling;
 
     if (desc.classList.contains("expanded")) {
       desc.classList.remove("expanded");
-      desc.style.webkitLineClamp = 3;
       btn.textContent = "Xem thêm";
     } else {
       desc.classList.add("expanded");
-      desc.style.webkitLineClamp = "unset";
       btn.textContent = "Thu gọn";
     }
   }
 
-</script>
+  function addToCart(productId) {
+    alert("Thêm sản phẩm " + productId + " vào giỏ hàng ✅");
+  }
 
+  function viewProductDetail(productId) {
+    window.location.href = `/products/${productId}`;
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.sort-select')) {
+      document.getElementById('sort-dropdown').classList.remove('show');
+    }
+  });
+
+  // ==================== INITIALIZE ====================
+  document.addEventListener("DOMContentLoaded", function () {
+    loadCategories();
+    loadFeaturedProducts();
+  });
+</script>
 
 </body>
 </html>
