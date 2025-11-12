@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <th:block th:replace="~{header :: head}"></th:block>
+
+    <!-- External CSS with Thymeleaf -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+    <!-- Static CSS files with Thymeleaf -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/vendor.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+          rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .order-summary {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .order-summary h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-info h4 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .cart-item-price {
+            text-align: right;
+        }
+
+        .cart-item-price .price {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<th:block th:replace="~{header :: svg-icons}"></th:block>
+
+<th:block th:replace="~{header :: offcanvas-cart}"></th:block>
+
+<div class="preloader-wrapper"><div class="preloader"></div></div>
+
+<th:block th:replace="~{header :: header}"></th:block>
+
+
+<!-- Main Content -->
+<div class="container">
+    <div class="header">
+        <h1>🛒 Thanh Toán</h1>
+        <p>Hoàn tất đơn hàng của bạn</p>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+
+    <div class="content">
+        <div class="form-section">
+            <form id="checkoutForm">
+                <h3 style="margin-bottom: 20px; color: #333;">Thông Tin Khách Hàng</h3>
+
+                <div class="form-group">
+                    <label for="customerName">Họ và tên <span class="required">*</span></label>
+                    <input type="text" id="customerName" name="customerName" required
+                           placeholder="Nguyễn Văn A">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerEmail">Email <span class="required">*</span></label>
+                    <input type="email" id="customerEmail" name="customerEmail" required
+                           placeholder="email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerPhone">Số điện thoại <span class="required">*</span></label>
+                    <input type="tel" id="customerPhone" name="customerPhone" required
+                           placeholder="0123456789" pattern="[0-9]{10,11}">
+                </div>
+
+                <h3 style="margin: 30px 0 20px; color: #333;">Địa Chỉ Giao Hàng</h3>
+
+                <div class="form-group">
+                    <label for="shippingAddress">Địa chỉ <span class="required">*</span></label>
+                    <input type="text" id="shippingAddress" name="shippingAddress" required
+                           placeholder="Số nhà, tên đường">
+                </div>
+
+                <div class="form-group">
+                    <label for="shippingWard">Phường/Xã</label>
+                    <input type="text" id="shippingWard" name="shippingWard"
+                           placeholder="Phường/Xã">
+                </div>
+
+                <div class="form-group">
+                    <label for="shippingDistrict">Quận/Huyện</label>
+                    <input type="text" id="shippingDistrict" name="shippingDistrict"
+                           placeholder="Quận/Huyện">
+                </div>
+
+                <div class="form-group">
+                    <label for="shippingCity">Thành phố</label>
+                    <input type="text" id="shippingCity" name="shippingCity"
+                           placeholder="Thành phố">
+                </div>
+
+                <h3 style="margin: 30px 0 20px; color: #333;">Thanh Toán</h3>
+
+                <div class="form-group">
+                    <label for="paymentMethod">Phương thức thanh toán <span class="required">*</span></label>
+                    <select id="paymentMethod" name="paymentMethod" required>
+                        <option value="">-- Chọn phương thức --</option>
+                        <option value="COD">💵 Thanh toán khi nhận hàng (COD)</option>
+                        <option value="BANK_TRANSFER">🏦 Chuyển khoản ngân hàng</option>
+                        <option value="MOMO">📱 Ví MoMo</option>
+                        <option value="ZALOPAY">💳 ZaloPay</option>
+                        <option value="VNPAY">💰 VNPay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="voucherCode">Mã giảm giá</label>
+                    <input type="text" id="voucherCode" name="voucherCode"
+                           placeholder="Nhập mã giảm giá (nếu có)">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Ghi chú</label>
+                    <textarea id="notes" name="notes"
+                              placeholder="Ghi chú thêm cho đơn hàng (tùy chọn)"></textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h2>📦 Đơn Hàng</h2>
+
+            <div id="cartItems">
+                <!-- Cart items will be loaded here -->
+            </div>
+
+            <div class="summary-row">
+                <span>Tạm tính:</span>
+                <span id="subtotal">0 ₫</span>
+            </div>
+            <div class="summary-row">
+                <span>Phí vận chuyển:</span>
+                <span id="shippingFee">30,000 ₫</span>
+            </div>
+            <div class="summary-row">
+                <span>Thuế (10%):</span>
+                <span id="tax">0 ₫</span>
+            </div>
+            <div class="summary-row total">
+                <span>Tổng cộng:</span>
+                <span id="total">0 ₫</span>
+            </div>
+
+            <button type="submit" class="btn-submit" onclick="submitCheckout()">
+                Đặt Hàng Ngay
+            </button>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{header :: scripts}"></th:block>
+
+
+<script th:inline="javascript">
+    // Load cart items when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadCartItems();
+});
+
+// Function to load cart items from API
+async function loadCartItems() {
+    try {
+        const response = await fetch('/api/cart');
+        if (!response.ok) {
+            throw new Error('Failed to load cart');
+        }
+
+        const cart = await response.json();
+
+        // Display cart items
+        displayCartItems(cart);
+
+        // Calculate and display totals
+        calculateTotals(cart);
+
+    } catch (error) {
+        console.error('Error loading cart:', error);
+        showError('Không thể tải giỏ hàng. Vui lòng thử lại.');
+    }
+}
+
+// Function to display cart items
+function displayCartItems(cart) {
+    const cartItemsContainer = document.getElementById('cartItems');
+
+    if (!cart.items || cart.items.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: #666;">
+                <p>Giỏ hàng trống</p>
+                <a href="/shop" style="color: #667eea; text-decoration: none;">← Tiếp tục mua sắm</a>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    cart.items.forEach(item => {
+        html += `
+            <div class="cart-item">
+                <img src="${item.mainImageUrl || '/images/placeholder.jpg'}"
+                     alt="${item.productName}"
+                     onerror="this.src='/images/placeholder.jpg'">
+                <div class="cart-item-info">
+                    <h4>${item.productName}</h4>
+                    <p>Số lượng: ${item.quantity}</p>
+                    ${item.sizeSelected ? `<p>Size: ${item.sizeSelected}</p>` : ''}
+                </div>
+                <div class="cart-item-price">
+                    <p class="price">${formatCurrency(item.price)}</p>
+                    <p style="font-size: 12px; color: #666;">
+                        Tổng: ${formatCurrency(item.subTotal)}
+                    </p>
+                </div>
+            </div>
+        `;
+    });
+
+    cartItemsContainer.innerHTML = html;
+}
+
+// Function to calculate totals
+function calculateTotals(cart) {
+    const subtotal = cart.totalAmount || 0;
+    const shippingFee = 30000; // Fixed shipping fee
+    const taxRate = 0.10; // 10% tax
+    const tax = subtotal * taxRate;
+    const total = subtotal + shippingFee + tax;
+
+    // Update UI
+    document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+    document.getElementById('shippingFee').textContent = formatCurrency(shippingFee);
+    document.getElementById('tax').textContent = formatCurrency(tax);
+    document.getElementById('total').textContent = formatCurrency(total);
+}
+
+// Function to format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(amount);
+}
+
+// Function to submit checkout
+async function submitCheckout() {
+    const form = document.getElementById('checkoutForm');
+
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading"></span> Đang xử lý...';
+
+    try {
+        // Get form data
+        const formData = {
+            customerName: document.getElementById('customerName').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            customerPhone: document.getElementById('customerPhone').value,
+            shippingAddress: document.getElementById('shippingAddress').value,
+            shippingWard: document.getElementById('shippingWard').value,
+            shippingDistrict: document.getElementById('shippingDistrict').value,
+            shippingCity: document.getElementById('shippingCity').value,
+            paymentMethod: document.getElementById('paymentMethod').value,
+            voucherCode: document.getElementById('voucherCode').value,
+            notes: document.getElementById('notes').value
+        };
+
+
+        // Show success message
+        showSuccess('Đặt hàng thành công! Đang chuyển hướng...');
+
+        // Redirect to success page
+        setTimeout(() => {
+            // <-- CHANGED: Updated the redirect URL
+            window.location.href = '/';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showError('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.');
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Đặt Hàng Ngay';
+    }
+}
+
+// Function to show error message
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Function to show success message
+function showSuccess(message) {
+    const successDiv = document.getElementById('successMessage');
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Apply voucher code (optional feature)
+document.getElementById('voucherCode')?.addEventListener('blur', async function() {
+    const voucherCode = this.value.trim();
+
+    if (voucherCode) {
+        try {
+            // Replace with your actual voucher validation endpoint
+            const response = await fetch(`/api/voucher/validate?code=${voucherCode}`);
+
+            if (response.ok) {
+                const voucher = await response.json();
+                // Apply discount and recalculate
+                // This is a placeholder - implement based on your voucher logic
+                console.log('Voucher applied:', voucher);
+            }
+        } catch (error) {
+            console.error('Error validating voucher:', error);
+        }
+    }
+});
+</script>
+</body>
+</html>
