@@ -16,9 +16,13 @@ public class CheckoutController {
 
     @GetMapping("/checkout")
     public String showCheckoutPage(Model model, HttpSession session) {
+        // Get session ID
+        String sessionId = getOrCreateSessionId(session);
 
         // Get cart to verify it's not empty
-        CartDTO cart = cartService.getCart(null, null);
+        CartDTO cart = cartService.getCart(null, sessionId);
+
+
 
         // Add cart info to model (optional, for server-side rendering)
         model.addAttribute("cart", cart);
@@ -26,13 +30,13 @@ public class CheckoutController {
         return "checkout";
     }
 
-    @GetMapping("/order-success")
-    public String orderSuccess(Model model, HttpSession session) {
-
-        CartDTO cart = cartService.getCart(null, null);
-
-        model.addAttribute("cart", cart);
-
-        return "order-success";
+    private String getOrCreateSessionId(HttpSession session) {
+        String sessionId = (String) session.getAttribute("sessionId");
+        if (sessionId == null || sessionId.isEmpty()) {
+            sessionId = java.util.UUID.randomUUID().toString();
+            session.setAttribute("sessionId", sessionId);
+        }
+        return sessionId;
     }
+
 }
